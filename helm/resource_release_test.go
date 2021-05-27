@@ -854,7 +854,7 @@ func testAccCheckHelmReleaseDependencyUpdate(namespace string, name string, expe
 			return fmt.Errorf("provider not properly initialized")
 		}
 
-		actionConfig, err := m.(*Meta).GetHelmConfiguration(namespace)
+		actionConfig, err := m.(*Meta).GetHelmConfiguration(namespace, nil)
 		if err != nil {
 			return err
 		}
@@ -886,7 +886,7 @@ func testAccCheckHelmReleaseDestroy(namespace string) resource.TestCheckFunc {
 			return fmt.Errorf("provider not properly initialized")
 		}
 
-		actionConfig, err := m.(*Meta).GetHelmConfiguration(namespace)
+		actionConfig, err := m.(*Meta).GetHelmConfiguration(namespace, nil)
 		if err != nil {
 			return err
 		}

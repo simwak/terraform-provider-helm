@@ -340,6 +340,13 @@ func dataTemplate() *schema.Resource {
 				Computed:    true,
 				Description: "Rendered notes if the chart contains a `NOTES.txt`.",
 			},
+			"kubernetes": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				Description: "Kubernetes configuration.",
+				Elem:        kubernetesResource(),
+			},
 		},
 	}
 }
@@ -352,6 +359,7 @@ func dataTemplateRead(ctx context.Context, d *schema.ResourceData, meta interfac
 
 	name := d.Get("name").(string)
 	n := d.Get("namespace").(string)
+	k := d.Get("kubernetes")
 
 	var apiVersions []string
 
@@ -375,7 +383,7 @@ func dataTemplateRead(ctx context.Context, d *schema.ResourceData, meta interfac
 
 	debug("%s Getting Config", logID)
 
-	actionConfig, err := m.GetHelmConfiguration(n)
+	actionConfig, err := m.GetHelmConfiguration(n, k)
 	if err != nil {
 		return diag.FromErr(err)
 	}

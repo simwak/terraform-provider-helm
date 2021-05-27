@@ -391,6 +391,13 @@ func resourceRelease() *schema.Resource {
 					},
 				},
 			},
+			"kubernetes": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				Description: "Kubernetes configuration.",
+				Elem:        kubernetesResource(),
+			},
 		},
 	}
 }
@@ -411,8 +418,9 @@ func resourceReleaseRead(ctx context.Context, d *schema.ResourceData, meta inter
 
 	m := meta.(*Meta)
 	n := d.Get("namespace").(string)
+	k := d.Get("kubernetes")
 
-	c, err := m.GetHelmConfiguration(n)
+	c, err := m.GetHelmConfiguration(n, k)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -467,9 +475,11 @@ func resourceReleaseCreate(ctx context.Context, d *schema.ResourceData, meta int
 
 	m := meta.(*Meta)
 	n := d.Get("namespace").(string)
+	k := d.Get("kubernetes")
 
 	debug("%s Getting helm configuration", logID)
-	actionConfig, err := m.GetHelmConfiguration(n)
+
+	actionConfig, err := m.GetHelmConfiguration(n, k)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -589,7 +599,8 @@ func resourceReleaseCreate(ctx context.Context, d *schema.ResourceData, meta int
 func resourceReleaseUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	m := meta.(*Meta)
 	n := d.Get("namespace").(string)
-	actionConfig, err := m.GetHelmConfiguration(n)
+	k := d.Get("kubernetes")
+	actionConfig, err := m.GetHelmConfiguration(n, k)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -667,7 +678,8 @@ func resourceReleaseUpdate(ctx context.Context, d *schema.ResourceData, meta int
 func resourceReleaseDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	m := meta.(*Meta)
 	n := d.Get("namespace").(string)
-	actionConfig, err := m.GetHelmConfiguration(n)
+	k := d.Get("kubernetes")
+	actionConfig, err := m.GetHelmConfiguration(n, k)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -739,8 +751,9 @@ func resourceDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{})
 
 		name := d.Get("name").(string)
 		namespace := d.Get("namespace").(string)
+		kubernetes := d.Get("kubernetes")
 
-		actionConfig, err := m.GetHelmConfiguration(namespace)
+		actionConfig, err := m.GetHelmConfiguration(namespace, kubernetes)
 		if err != nil {
 			return err
 		}
@@ -898,8 +911,9 @@ func resourceReleaseExists(d *schema.ResourceData, meta interface{}) (bool, erro
 
 	m := meta.(*Meta)
 	n := d.Get("namespace").(string)
+	k := d.Get("kubernetes")
 
-	c, err := m.GetHelmConfiguration(n)
+	c, err := m.GetHelmConfiguration(n, k)
 	if err != nil {
 		return false, err
 	}
@@ -1141,7 +1155,7 @@ func resourceHelmReleaseImportState(ctx context.Context, d *schema.ResourceData,
 
 	m := meta.(*Meta)
 
-	c, err := m.GetHelmConfiguration(namespace)
+	c, err := m.GetHelmConfiguration(namespace, nil)
 	if err != nil {
 		return nil, err
 	}

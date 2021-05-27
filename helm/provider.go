@@ -359,11 +359,16 @@ func (m *Meta) GetEnabledExperiments() []string {
 }
 
 // GetHelmConfiguration will return a new Helm configuration
-func (m *Meta) GetHelmConfiguration(namespace string) (*action.Configuration, error) {
+func (m *Meta) GetHelmConfiguration(namespace string, kubernetes interface{}) (*action.Configuration, error) {
 	m.Lock()
 	defer m.Unlock()
 	debug("[INFO] GetHelmConfiguration start")
 	actionConfig := new(action.Configuration)
+
+	if kubernetes != nil && fmt.Sprint(kubernetes) != "[]" {
+		debug("[INFO] Using Kubernetes credentials from resource")
+		m.data.Set("kubernetes", kubernetes)
+	}
 
 	kc, err := newKubeConfig(m.data, &namespace)
 	if err != nil {
